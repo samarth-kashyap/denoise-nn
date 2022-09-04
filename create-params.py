@@ -29,6 +29,7 @@ for i in range(100):
     bg_curvature_superlist.append(bg_curvature)
 
 
+np.save(f"data-files/x.npy", x)
 np.save(f"data-files/x0.npy", x0_superlist)
 np.save(f"data-files/gamma.npy", gamma_superlist)
 np.save(f"data-files/bg_dcshift.npy", bg_dcshift_superlist)
