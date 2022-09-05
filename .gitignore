@@ -1,5 +1,6 @@
 *.png
 *.ipynb_checkpoints
 __pycache__
+notebooks/data
 data-files
 synth-data

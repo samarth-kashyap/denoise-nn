@@ -46,6 +46,10 @@ x0_superlist = np.load('data-files/x0.npy')
 gamma_superlist = np.load('data-files/gamma.npy')
 bg_dcshift_superlist = np.load('data-files/bg_dcshift.npy')
 bg_curvature_superlist = np.load('data-files/bg_curvature.npy')
+num_lorentzians = 2
+total_samples = 10000
+num_realizations = 50
+
 
 synth_datagen_dict = {}
 synth_datagen_dict['x'] = x
@@ -53,17 +57,16 @@ synth_datagen_dict['x0_superlist'] = x0_superlist
 synth_datagen_dict['gamma_superlist'] = gamma_superlist
 synth_datagen_dict['bg_dcshift_superlist'] = bg_dcshift_superlist
 synth_datagen_dict['bg_curvature_superlist'] = bg_curvature_superlist
+synth_datagen_dict['total_samples'] = total_samples
+synth_datagen_dict['num_realizations'] = num_realizations
 fn.save_obj(synth_datagen_dict, f"{store_dir}/metadata")
 
-total_samples = 10000
-num_realizations = 50
+
 
 
 for samplenum in tqdm(range(total_samples), desc='samples'):
-    amps = [np.random.uniform(low=0.5, high=1.5),
-            np.random.uniform(low=0.5, high=1.5),
-            np.random.uniform(low=0.5, high=1.5),
-            np.random.uniform(low=0.5, high=1.5)]
+    amps = [np.random.uniform(low=0.5, high=1.5) 
+            for i in range(num_lorentzians)]
     rlz_super = []
     sig_super = []
     for idx_super, x0list in enumerate(x0_superlist):
