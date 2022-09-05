@@ -5,6 +5,7 @@ from datetime import date
 from datetime import datetime
 from tqdm import tqdm
 import functions as fn
+from params import params
 import os
 
 todays_date = date.today()
@@ -15,6 +16,9 @@ store_dir = f'synth-data/{fsuffix}'
 print(f"store directory = {store_dir}")
 try:
     os.system(f"mkdir {store_dir}")
+    os.system(f"mkdir {store_dir}/noisy")
+    os.system(f"mkdir {store_dir}/target")
+    os.system(f"mkdir {store_dir}/torch")
 except:
     pass
 
@@ -46,9 +50,9 @@ x0_superlist = np.load('data-files/x0.npy')
 gamma_superlist = np.load('data-files/gamma.npy')
 bg_dcshift_superlist = np.load('data-files/bg_dcshift.npy')
 bg_curvature_superlist = np.load('data-files/bg_curvature.npy')
-num_lorentzians = 2
-total_samples = 10000
-num_realizations = 50
+num_lorentzians = params.num_lorentzians
+total_samples = 1000
+num_realizations = 20
 
 
 synth_datagen_dict = {}
@@ -91,9 +95,11 @@ for samplenum in tqdm(range(total_samples), desc='samples'):
     sig_super = np.asarray(sig_super)
 
     for i in range(num_realizations):
-        fnamer_suffix = f"{samplenum}-{i:02d}"
-        savenpy(f"{store_dir}/synth-{fnamer_suffix}.npy", rlz_super[:, i, :])
-        
-    fnamet_suffix = f"{samplenum}"
-    savenpy(f"{store_dir}/true-{fnamet_suffix}.npy", sig-bg)
+        datadict = {}
+        datadict['noisy'] = np.squeeze(rlz_super[:, i, :])
+        datadict['target'] = np.squeeze(sig-bg)
+        fname_suffix = f"{samplenum:05d}{i:02d}"
+        savenpy(f"{store_dir}/noisy/synth-{fname_suffix}.npy", np.squeeze(rlz_super[:, i, :]))
+        savenpy(f"{store_dir}/target/true-{fname_suffix}.npy", np.squeeze(sig-bg))
+        fn.save_obj(datadict, f"{store_dir}/torch/data-{fname_suffix}")
 

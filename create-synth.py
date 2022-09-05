@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import argparse
 
 
-
 def background(x, a, b):
     xhalfidx = np.argmin(abs(x-x[len(x)//2]))
     xhalf = x[xhalfidx]
@@ -19,17 +18,15 @@ def get_realization(sig, max_scale=20., noise_scale=3.):
     noisy_sig = sig + np.random.randn(len(sig))*sig/noise_scale
     return noisy_sig
 
+x = np.load('data-files/x.npy')
+x0_superlist = np.load('data-files/x0.npy')
+gamma_superlist = np.load('data-files/gamma.npy')
+bg_dcshift_superlist = np.load('data-files/bg_dcshift.npy')
+bg_curvature_superlist = np.load('data-files/bg_curvature.npy')
 
-x = np.linspace(0, 15, 1000)
-x0list = [np.random.uniform(low=4, high=5), 
-          np.random.uniform(low=5.2, high=6.2),
-          np.random.uniform(low=6.3, high=7.3),
-          np.random.uniform(low=7.4, high=8.5)]
-
-gammalist = [np.random.uniform(low=0.1, high=0.5),
-             np.random.uniform(low=0.1, high=0.5),
-	     np.random.uniform(low=0.1, high=0.5),
-             np.random.uniform(low=0.1, high=0.5)]
+idx = np.random.randint(len(x0_superlist))
+x0list = x0_superlist[idx]
+gammalist = gamma_superlist[idx]
 
 sig = 0
 for idx, x0 in enumerate(x0list):
