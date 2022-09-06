@@ -4,3 +4,5 @@ __pycache__
 notebooks/data
 data-files
 synth-data
+train-set
+test-set

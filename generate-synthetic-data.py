@@ -8,17 +8,25 @@ import functions as fn
 from params import params
 import os
 
+training_or_testing = 'train'
+
 todays_date = date.today()
 timeprefix = datetime.now().strftime("%H.%M")
 dateprefix = f"{todays_date.day:02d}.{todays_date.month:02d}.{todays_date.year:04d}"
-fsuffix = f"{dateprefix}-{timeprefix}"
-store_dir = f'synth-data/{fsuffix}'
+timestamp = f"{dateprefix}-{timeprefix}"
+store_dir = f'{training_or_testing}-set'
 print(f"store directory = {store_dir}")
 try:
-    os.system(f"mkdir {store_dir}")
     os.system(f"mkdir {store_dir}/noisy")
     os.system(f"mkdir {store_dir}/target")
     os.system(f"mkdir {store_dir}/torch")
+except:
+    pass
+
+try:
+    os.system(f"mkdir {store_dir}/noisy/{timestamp}")
+    os.system(f"mkdir {store_dir}/target/{timestamp}")
+    os.system(f"mkdir {store_dir}/torch/{timestamp}")
 except:
     pass
 
@@ -51,8 +59,8 @@ gamma_superlist = np.load('data-files/gamma.npy')
 bg_dcshift_superlist = np.load('data-files/bg_dcshift.npy')
 bg_curvature_superlist = np.load('data-files/bg_curvature.npy')
 num_lorentzians = params.num_lorentzians
-total_samples = 1000
-num_realizations = 20
+total_samples = 5000 if training_or_testing == 'train' else 500
+num_realizations = 50 if training_or_testing == 'train' else 20
 
 
 synth_datagen_dict = {}
@@ -63,7 +71,7 @@ synth_datagen_dict['bg_dcshift_superlist'] = bg_dcshift_superlist
 synth_datagen_dict['bg_curvature_superlist'] = bg_curvature_superlist
 synth_datagen_dict['total_samples'] = total_samples
 synth_datagen_dict['num_realizations'] = num_realizations
-fn.save_obj(synth_datagen_dict, f"{store_dir}/metadata")
+fn.save_obj(synth_datagen_dict, f"{store_dir}/metadata-{timestamp}")
 
 
 
@@ -80,8 +88,8 @@ for samplenum in tqdm(range(total_samples), desc='samples'):
         sig = 0.0
         for idx, x0 in enumerate(x0list):
             gamma = gammalist[idx]
-            sig += lorentzian(x, x0, gamma, amp=amps[idx])
-        bg = background(x, bg_dcshift, bg_curvature)
+            sig += lorentzian(x, x0, gamma, amp=amps[idx]*0.1)
+        bg = background(x, bg_dcshift, bg_curvature)*0.1
         sig += bg
     
         rlz_list = []
@@ -91,15 +99,15 @@ for samplenum in tqdm(range(total_samples), desc='samples'):
         rlz_super.append(rlz_list)
         sig_super.append(sig - bg)
 
-    rlz_super = np.asarray(rlz_super)
-    sig_super = np.asarray(sig_super)
+    rlz_super = np.asarray(rlz_super).astype('float32')
+    sig_super = np.asarray(sig_super).astype('float32')
 
     for i in range(num_realizations):
         datadict = {}
         datadict['noisy'] = np.squeeze(rlz_super[:, i, :])
         datadict['target'] = np.squeeze(sig-bg)
         fname_suffix = f"{samplenum:05d}{i:02d}"
-        savenpy(f"{store_dir}/noisy/synth-{fname_suffix}.npy", np.squeeze(rlz_super[:, i, :]))
-        savenpy(f"{store_dir}/target/true-{fname_suffix}.npy", np.squeeze(sig-bg))
-        fn.save_obj(datadict, f"{store_dir}/torch/data-{fname_suffix}")
+        savenpy(f"{store_dir}/noisy/{timestamp}/synth-{fname_suffix}.npy", np.squeeze(rlz_super[:, i, :]))
+        savenpy(f"{store_dir}/target/{timestamp}/true-{fname_suffix}.npy", np.squeeze(sig-bg))
+        fn.save_obj(datadict, f"{store_dir}/torch/{timestamp}/data-{fname_suffix}", printop=False)
 

@@ -1,9 +1,9 @@
 import pickle
 
-def save_obj(obj, name):
+def save_obj(obj, name, printop=True):
     with open(name + '.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
-    print(f"Writing to {name}.pkl")
+    if printop: print(f"Writing to {name}.pkl")
     return None
 
 
