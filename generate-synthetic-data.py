@@ -8,7 +8,7 @@ import functions as fn
 from params import params
 import os
 
-training_or_testing = 'train'
+training_or_testing = 'test'
 
 todays_date = date.today()
 timeprefix = datetime.now().strftime("%H.%M")
@@ -59,8 +59,8 @@ gamma_superlist = np.load('data-files/gamma.npy')
 bg_dcshift_superlist = np.load('data-files/bg_dcshift.npy')
 bg_curvature_superlist = np.load('data-files/bg_curvature.npy')
 num_lorentzians = params.num_lorentzians
-total_samples = 5000 if training_or_testing == 'train' else 500
-num_realizations = 50 if training_or_testing == 'train' else 20
+total_samples = 1000 if training_or_testing == 'train' else 500
+num_realizations = 25 if training_or_testing == 'train' else 20
 
 
 synth_datagen_dict = {}
@@ -74,8 +74,7 @@ synth_datagen_dict['num_realizations'] = num_realizations
 fn.save_obj(synth_datagen_dict, f"{store_dir}/metadata-{timestamp}")
 
 
-
-
+samplecount = 0
 for samplenum in tqdm(range(total_samples), desc='samples'):
     amps = [np.random.uniform(low=0.5, high=1.5) 
             for i in range(num_lorentzians)]
@@ -95,19 +94,11 @@ for samplenum in tqdm(range(total_samples), desc='samples'):
         rlz_list = []
         for i in range(num_realizations):
             rlz = get_realization(sig)
-            rlz_list.append(rlz)
-        rlz_super.append(rlz_list)
-        sig_super.append(sig - bg)
-
-    rlz_super = np.asarray(rlz_super).astype('float32')
-    sig_super = np.asarray(sig_super).astype('float32')
-
-    for i in range(num_realizations):
-        datadict = {}
-        datadict['noisy'] = np.squeeze(rlz_super[:, i, :])
-        datadict['target'] = np.squeeze(sig-bg)
-        fname_suffix = f"{samplenum:05d}{i:02d}"
-        savenpy(f"{store_dir}/noisy/{timestamp}/synth-{fname_suffix}.npy", np.squeeze(rlz_super[:, i, :]))
-        savenpy(f"{store_dir}/target/{timestamp}/true-{fname_suffix}.npy", np.squeeze(sig-bg))
-        fn.save_obj(datadict, f"{store_dir}/torch/{timestamp}/data-{fname_suffix}", printop=False)
-
+            datadict = {}
+            datadict['noisy'] = np.squeeze(rlz).astype('float32')
+            datadict['target'] = np.squeeze(sig-bg).astype('float32')
+            fname_suffix = f"{samplecount:08d}"
+            savenpy(f"{store_dir}/noisy/{timestamp}/synth-{fname_suffix}.npy", np.squeeze(rlz).astype('float32'))
+            savenpy(f"{store_dir}/target/{timestamp}/true-{fname_suffix}.npy", np.squeeze(sig-bg).astype('float32'))
+            fn.save_obj(datadict, f"{store_dir}/torch/{timestamp}/data-{fname_suffix}", printop=False)
+            samplecount += 1

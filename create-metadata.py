@@ -22,6 +22,7 @@ bg_curvature_superlist = []
 for i in range(num_inputs):
     x0list = [np.random.uniform(low=xlo[j], high=xhi[j])
               for j in range(num_lorentzians)]
+    print(x0list)
 
     gammalist = [np.random.uniform(low=0.1, high=0.5)
                  for j in range(num_lorentzians)]
