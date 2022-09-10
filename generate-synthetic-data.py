@@ -8,7 +8,7 @@ import functions as fn
 from params import params
 import os
 
-training_or_testing = 'test'
+training_or_testing = 'train'
 
 todays_date = date.today()
 timeprefix = datetime.now().strftime("%H.%M")
@@ -81,6 +81,7 @@ for samplenum in tqdm(range(total_samples), desc='samples'):
     rlz_super = []
     sig_super = []
     for idx_super, x0list in enumerate(x0_superlist):
+        noise_scale = np.random.uniform(2.0, 4.0)
         bg_dcshift = bg_dcshift_superlist[idx_super]
         bg_curvature = bg_curvature_superlist[idx_super]
         gammalist = gamma_superlist[idx_super]
@@ -93,7 +94,7 @@ for samplenum in tqdm(range(total_samples), desc='samples'):
     
         rlz_list = []
         for i in range(num_realizations):
-            rlz = get_realization(sig)
+            rlz = get_realization(sig, noise_scale=noise_scale)
             datadict = {}
             datadict['noisy'] = np.squeeze(rlz).astype('float32')
             datadict['target'] = np.squeeze(sig-bg).astype('float32')
