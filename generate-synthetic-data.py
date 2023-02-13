@@ -6,9 +6,16 @@ from datetime import datetime
 from tqdm import tqdm
 import functions as fn
 from params import params
+import argparse
 import os
 
-training_or_testing = 'train'
+parser = argparse.ArgumentParser(description='Argument Parser')
+parser.add_argument('test', action=store_true, default=False)
+parser.add_argument('noise', type=str, default='chisq',
+                    help='gaussian, chisq')
+ARGS = parser.parse_args()
+
+training_or_testing = 'test' if ARGS.test else 'train'
 
 todays_date = date.today()
 timeprefix = datetime.now().strftime("%H.%M")
@@ -41,9 +48,18 @@ def lorentzian(x, x0, gamma, amp=1.0):
     return amp*gamma/2/np.pi/((x-x0)**2 + gamma*gamma/4)
 
 
-def get_realization(sig, max_scale=20., noise_scale=3.):
+def get_realization(sig, max_scale=20., noise_scale=3., noisetype=ARGS.noise):
     max_noise = sig.max()/max_scale
-    noisy_sig = sig + np.random.randn(len(sig))*sig/noise_scale
+
+    if noisetype == 'gaussian':
+        noisy_sig = sig + np.random.randn(len(sig))*sig/noise_scale
+    elif noisetype == 'chisq':
+        n1 = np.random.randn(len(sig))
+        n2 = np.random.randn(len(sig))
+        chisq2 = n1*n1 + n2*n2
+        noisy_sig = sig * ((1 + np.random.randn(len(sig))/noise_scale) *
+                           (1 + np.random.randn(len(sig))/noise_scale))
+        noisy_sig = sig * chisq2
     return noisy_sig
 
 
